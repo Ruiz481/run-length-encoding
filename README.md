@@ -20,3 +20,10 @@ The encoder writes each run as `<character><count>` and concatenates the runs. T
 ## Awkward edge
 
 Digit characters in the input are treated as ordinary data: `encode('111')` produces `'13'` (the character `'1'` with count `3`). The decoder still reads it correctly because it always reads a count then a single character. Astral code points (emoji and the like) are kept intact because iteration uses `Array.from`, which does not split surrogate pairs. Do not hand-write compressed strings with a leading digit run — the decoder expects the encoder's `<char><count>` shape and will reject malformed input rather than guess.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
